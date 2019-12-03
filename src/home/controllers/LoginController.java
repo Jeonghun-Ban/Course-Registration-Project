@@ -1,9 +1,10 @@
 package home.controllers;
 
 import home.controllers.MainController;
+import home.controls.LoginControl;
 import home.fileController.CheckDuplication;
+import home.model.UserModel;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
@@ -57,6 +58,9 @@ public class LoginController implements Initializable {
 	public LoginController() {
 		this.controller = new MainController();
 	}
+	
+	// LoginControl
+	LoginControl loginControl = new LoginControl();
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -130,6 +134,15 @@ public class LoginController implements Initializable {
 		// Login 여부에 따라 Action 제어
 		try {
 			loginCheck = this.authenticate(inputID, inputPassword);
+			
+			UserModel user = loginControl.getUser();
+
+			dataID = user.getUserID();
+			dataPassword = user.getUserPassword();
+			dataName = user.getUserName();
+			dataCollege = user.getUserCollege();
+			dataDepartment = user.getUserDepartment();
+			dataNumber = user.getUserNumber();
 					
 			if(loginCheck) {
 				String userInfo = this.dataID + " "+this.dataName+" "+this.dataCollege + " "+this.dataDepartment + " "+this.dataNumber;
@@ -154,31 +167,9 @@ public class LoginController implements Initializable {
 		}
 	}
 	
-	// Login DB 읽기 전용 메소드
-	public void read(Scanner scanner) {
-		this.dataID = scanner.next();
-		this.dataPassword = scanner.next();
-		this.dataName = scanner.next();
-		this.dataCollege = scanner.next();
-		this.dataDepartment = scanner.next();
-		this.dataNumber = scanner.next();
-	}
-	
 	// Login DB와 사용자 입력값 비교 메소드
 	public boolean authenticate(String inputID, String inputPassword) throws FileNotFoundException{
-		Scanner scanner;
-		scanner = new Scanner(new File("data/user/Login"));
-			
-		while(scanner.hasNext()) {
-			this.read(scanner);
-
-			if(this.dataID.equals(inputID)&&this.dataPassword.equals(inputPassword)) {
-				scanner.close();
-				return true;
-			}
-		}
-		scanner.close();
-		return false;
+		return loginControl.authenticate(inputID, inputPassword);
 	}
 	
 	// ID 저장 메소드
