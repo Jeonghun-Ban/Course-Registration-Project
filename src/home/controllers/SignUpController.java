@@ -2,6 +2,7 @@ package home.controllers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Scanner;
@@ -110,6 +111,13 @@ public class SignUpController implements Initializable {
 				String userInfo = this.inputID+" "+this.inputPassword+" "+this.inputName+" "+this.inputCollege + " "+this.inputDepartment + " "+this.inputNumber;
 				CheckDuplication.manageUserFile(userInfo, "data/User/Login");
 				this.signUpCheck = true;
+				
+				// 회원가입한 사용자의 파일 생성
+				File basket = new File("data/user/" + inputID + "_Basket");
+				basket.createNewFile();
+				File register = new File("data/user/" + inputID + "_Register");
+				register.createNewFile();
+				
 			} else if(!idCheck && numberCheck) {
 				Alert alert = new Alert(AlertType.ERROR);
 				alert.setTitle("Sign Up Failed");
@@ -126,6 +134,9 @@ public class SignUpController implements Initializable {
 				this.signUpCheck = false;
 			}
 		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -162,6 +173,7 @@ public class SignUpController implements Initializable {
 		}
 		
 		scanner.close();
+		
 		return false;
 	}
 	
