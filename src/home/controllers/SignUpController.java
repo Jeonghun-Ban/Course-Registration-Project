@@ -5,18 +5,18 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.Scanner;
 
+import home.controls.SignUpControl;
 import home.fileController.CheckDuplication;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 
 public class SignUpController implements Initializable {
@@ -48,6 +48,9 @@ public class SignUpController implements Initializable {
 	private String dataCollege;
 	private String dataDepartment;
 	private String dataNumber;
+	
+	// SignUpControl
+	SignUpControl signUpControl = new SignUpControl();
 	
 	public SignUpController() {
 		this.controller = new MainController();
@@ -143,46 +146,10 @@ public class SignUpController implements Initializable {
 	}
 	
 	public boolean idAuthenticate(String inputID) throws FileNotFoundException {
-		Scanner scanner;
-		scanner = new Scanner(new File("data/user/Login"));
-		
-		while(scanner.hasNext()) {
-			this.read(scanner);
-			
-			if(dataID.equals(inputID)) {
-				scanner.close();
-				return true;
-			}
-		}
-		
-		scanner.close();
-		return false;
+		return signUpControl.idAuthenticate(inputID);
 	}
 	
 	public boolean personAuthenticate(String inputNumber) throws FileNotFoundException {
-		Scanner scanner;
-		scanner = new Scanner(new File("data/user/Login"));
-		
-		while(scanner.hasNext()) {
-			this.read(scanner);
-			
-			if(dataNumber.equals(inputNumber)) {
-				scanner.close();
-				return true;
-			}
-		}
-		
-		scanner.close();
-		
-		return false;
-	}
-	
-	public void read(Scanner scanner) {
-		this.dataID = scanner.next();
-		this.dataPassword = scanner.next();
-		this.dataName = scanner.next();
-		this.dataCollege = scanner.next();
-		this.dataDepartment = scanner.next();
-		this.dataNumber = scanner.next();
+		return signUpControl.personAuthenticate(inputNumber);
 	}
 }
