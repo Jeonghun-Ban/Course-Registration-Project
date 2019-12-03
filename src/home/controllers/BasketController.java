@@ -8,8 +8,10 @@ import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.Vector;
 
+import home.controls.BasketControl;
 import home.fileController.CheckDuplication;
 import home.model.LectureModel;
+import home.model.UserModel;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -83,6 +85,10 @@ public class BasketController implements Initializable{
 	
 	@FXML Label userNotification;
 	
+	// BasketControl
+	BasketControl basketControl = new BasketControl();
+
+	
 	public BasketController() {
 		this.controller = new MainController();
 		
@@ -91,21 +97,13 @@ public class BasketController implements Initializable{
 	
 	// Check Login User
 	public void checkCurrentUser() {
-		Scanner scanner;
-		try {
-			scanner = new Scanner(new File("data/user/CurrentUser"));
-	
-			while(scanner.hasNext()) {
-				this.userID = scanner.next();
-				this.userName = scanner.next();
-				this.userCollege = scanner.next();
-				this.userDepartment = scanner.next();
-				this.userNumber = scanner.next();			
-			}
-			scanner.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+		UserModel user = basketControl.checkCurrentUser();
+
+		userID = user.getUserID();
+		userName = user.getUserName();
+		userCollege = user.getUserCollege();
+		userDepartment = user.getUserDepartment();
+		userNumber = user.getUserNumber();
 	}
 	
 	public void initialize(URL location, ResourceBundle resources) {		
@@ -489,20 +487,10 @@ public class BasketController implements Initializable{
 	
 	// Load Data Method
 	private Vector<LectureModel> getBasketData(String fileName) throws FileNotFoundException{
-		basketModels = new Vector<LectureModel>();
-
-		Scanner scanner = new Scanner(new File(fileName));
-
-		while(scanner.hasNext()) {
-			LectureModel lectureModel = new LectureModel();
-			lectureModel.read(scanner);
-			basketModels.add(lectureModel);
-		}
-		scanner.close();
-		return basketModels;
+		return basketControl.getBasketData(fileName);
 	} 
 	
-	private void getBasketList(String fileName) throws FileNotFoundException {		
+	public void getBasketList(String fileName) throws FileNotFoundException {		
 		for(int i=0;i<basketTable.getItems().size();i++) {
 			basketTable.getItems().clear();
 		}
@@ -518,17 +506,7 @@ public class BasketController implements Initializable{
 	}
 	
 	private Vector<LectureModel> getRegisterData(String fileName) throws FileNotFoundException{
-		registerModels = new Vector<LectureModel>();
-
-		Scanner scanner = new Scanner(new File(fileName));
-
-		while(scanner.hasNext()) {
-			LectureModel registerModel = new LectureModel();
-			registerModel.read(scanner);
-			registerModels.add(registerModel);
-		}
-		scanner.close();
-		return registerModels;
+		return basketControl.getRegisterData(fileName);
 	} 
 	
 	private void getRegisterList(String fileName) throws FileNotFoundException {		
