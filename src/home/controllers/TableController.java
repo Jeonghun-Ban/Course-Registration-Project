@@ -8,10 +8,12 @@ import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.Vector;
 
+import home.controls.TableControl;
 import home.fileController.CheckDuplication;
 import home.fileController.FileTool;
 import home.model.DirectoryModel;
 import home.model.LectureModel;
+import home.model.UserModel;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -94,6 +96,9 @@ public class TableController implements Initializable{
     private FileTool fileTool;
     private CheckDuplication checkDuplication;
 
+    // TableControl
+    TableControl tableControl = new TableControl();
+    
     public TableController() {
         this.controller = new MainController();
 
@@ -103,24 +108,13 @@ public class TableController implements Initializable{
     }
 
     public void checkCurrentUser() {
-        Scanner scanner;
-        try {
-            scanner = new Scanner(new File("data/user/CurrentUser"));
-
-            while(scanner.hasNext()) {
-                this.userID = scanner.next();
-                this.userName = scanner.next();
-                this.userCollege = scanner.next();
-                this.userDepartment = scanner.next();
-                this.userNumber = scanner.next();
-            }
-
-            scanner.close();
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+        UserModel user = tableControl.checkCurrentUser();
+        
+        userID = user.getUserID();
+		userName = user.getUserName();
+		userCollege = user.getUserCollege();
+		userDepartment = user.getUserDepartment();
+		userNumber = user.getUserNumber();
     }
 
     // Initialize Methods
@@ -311,17 +305,7 @@ public class TableController implements Initializable{
 
     // [Campus] File Read and Add Items
     private Vector<DirectoryModel> getCampusData(String fileName) throws FileNotFoundException {
-        campusModels = new Vector<DirectoryModel>();
-
-        Scanner scanner = new Scanner(new File(fileName));
-
-        while(scanner.hasNext()) {
-            DirectoryModel campusModel = new DirectoryModel();
-            campusModel.read(scanner);
-            campusModels.add(campusModel);
-        }
-        scanner.close();
-        return campusModels;
+        return tableControl.getCampusData(fileName);
     }
 
     private String getCampusHyperLink(String fileName) throws FileNotFoundException {
@@ -349,17 +333,7 @@ public class TableController implements Initializable{
 
     // [College] File Read and Add Items
     private Vector<DirectoryModel> getCollegeData(String fileName) throws FileNotFoundException {
-        collegeModels = new Vector<DirectoryModel>();
-
-        Scanner scanner = new Scanner(new File(fileName));
-
-        while(scanner.hasNext()) {
-            DirectoryModel collegeModel = new DirectoryModel();
-            collegeModel.read(scanner);
-            collegeModels.add(collegeModel);
-        }
-        scanner.close();
-        return collegeModels;
+        return tableControl.getCollegeData(fileName);
     }
 
     private String getCollegeHyperLink(String fileName) throws FileNotFoundException {
@@ -386,17 +360,7 @@ public class TableController implements Initializable{
 
     // [Department] File Read and Add Items
     private Vector<DirectoryModel> getDepartmentData(String fileName) throws FileNotFoundException {
-        departmentModels = new Vector<DirectoryModel>();
-
-        Scanner scanner = new Scanner(new File(fileName));
-
-        while(scanner.hasNext()) {
-            DirectoryModel departmentModel = new DirectoryModel();
-            departmentModel.read(scanner);
-            departmentModels.add(departmentModel);
-        }
-        scanner.close();
-        return departmentModels;
+        return tableControl.getDepartmentData(fileName);
     }
 
     private String getDepartmentHyperLink(String fileName) throws FileNotFoundException {
@@ -421,17 +385,7 @@ public class TableController implements Initializable{
     // Lecture Methods
 
     private Vector<LectureModel> getLectureData(String fileName) throws FileNotFoundException{
-        lectureModels = new Vector<LectureModel>();
-
-        Scanner scanner = new Scanner(new File(fileName));
-
-        while(scanner.hasNext()) {
-            LectureModel lectureModel = new LectureModel();
-            lectureModel.read(scanner);
-            lectureModels.add(lectureModel);
-        }
-        scanner.close();
-        return lectureModels;
+        return tableControl.getLectureData(fileName);
     }
 
     private void getLectureList(String fileName) throws FileNotFoundException {
