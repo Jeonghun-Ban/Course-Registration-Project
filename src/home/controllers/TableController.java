@@ -1,16 +1,17 @@
 package home.controllers;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.Scanner;
 import java.util.Vector;
 
-import home.controls.TableControl;
+import home.constant;
 import home.fileController.CheckDuplication;
 import home.fileController.FileTool;
+import home.frameworks.TableInterface;
 import home.model.DirectoryModel;
 import home.model.LectureModel;
 import home.model.UserModel;
@@ -61,16 +62,16 @@ public class TableController implements Initializable{
     private String departmentPath = "englishYG";
 
     // Lecture
-    @FXML TableView<LectureModel> lectureTable;
+    @FXML TableView<LectureController> lectureTable;
 
-    @FXML TableColumn<LectureModel, Integer> numberColumn;
-    @FXML TableColumn<LectureModel, String> nameColumn;
-    @FXML TableColumn<LectureModel, String> professorColumn;
-    @FXML TableColumn<LectureModel, Integer> creditColumn;
-    @FXML TableColumn<LectureModel, String> timeColumn;
+    @FXML TableColumn<LectureController, Integer> numberColumn;
+    @FXML TableColumn<LectureController, String> nameColumn;
+    @FXML TableColumn<LectureController, String> professorColumn;
+    @FXML TableColumn<LectureController, Integer> creditColumn;
+    @FXML TableColumn<LectureController, String> timeColumn;
 
-    private Vector<LectureModel> lectureModels;
-    ObservableList<LectureModel> lectureList = FXCollections.observableArrayList();
+    private Vector<LectureController> lectureModels;
+    ObservableList<LectureController> lectureList = FXCollections.observableArrayList();
 
     private Object oldValue;
 
@@ -97,17 +98,30 @@ public class TableController implements Initializable{
     private CheckDuplication checkDuplication;
 
     // TableControl
-    TableControl tableControl = new TableControl();
+    TableInterface tableControl = null;
     
     public TableController() {
+    	
+    	try {
+			tableControl = (TableInterface) constant.registry.lookup("table");
+		} catch (RemoteException | NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
         this.controller = new MainController();
 
-        this.checkCurrentUser();
+        try {
+			this.checkCurrentUser();
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         this.fileTool = new FileTool();
         this.checkDuplication = new CheckDuplication();
     }
 
-    public void checkCurrentUser() {
+    public void checkCurrentUser() throws RemoteException {
         UserModel user = tableControl.checkCurrentUser();
         
         userID = user.getUserID();
@@ -134,7 +148,12 @@ public class TableController implements Initializable{
 
         // Directory Method
         try {
-            this.refreshDirectory();
+            try {
+				this.refreshDirectory();
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         } catch (FileNotFoundException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -208,7 +227,7 @@ public class TableController implements Initializable{
             public void handle(MouseEvent event) {
                 Vector<String> selectedLecture = new Vector<>();
                 Vector<String> selectedLectures = new Vector<>();
-                ObservableList<LectureModel> selectedItem = lectureTable.getSelectionModel().getSelectedItems();
+                ObservableList<LectureController> selectedItem = lectureTable.getSelectionModel().getSelectedItems();
 
                 for(int i=0;i<selectedItem.size();i++) {
                     selectedLecture.add(String.valueOf(selectedItem.get(i).getNumber()));
@@ -292,7 +311,7 @@ public class TableController implements Initializable{
 
     // Directory Methods
 
-    private void refreshDirectory() throws FileNotFoundException {
+    private void refreshDirectory() throws FileNotFoundException, RemoteException {
         this.campusPath = getCampusHyperLink(this.startPath);
         this.campusRefresh(0);
 
@@ -304,11 +323,11 @@ public class TableController implements Initializable{
     }
 
     // [Campus] File Read and Add Items
-    private Vector<DirectoryModel> getCampusData(String fileName) throws FileNotFoundException {
+    private Vector<DirectoryModel> getCampusData(String fileName) throws FileNotFoundException, RemoteException {
         return tableControl.getCampusData(fileName);
     }
 
-    private String getCampusHyperLink(String fileName) throws FileNotFoundException {
+    private String getCampusHyperLink(String fileName) throws FileNotFoundException, RemoteException {
         campusModels = getCampusData("data/"+fileName);
 
         campusItems.clear();
@@ -324,7 +343,12 @@ public class TableController implements Initializable{
         int item = (int)source;
         this.campusPath = this.campusModels.get(item).getHyperLink();
 
-        this.getCollegeHyperLink(this.campusPath);
+        try {
+			this.getCollegeHyperLink(this.campusPath);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         this.collegeRefresh(0);
         this.collegePickBox.getSelectionModel().select(0);
         this.departmentRefresh(0);
@@ -332,11 +356,11 @@ public class TableController implements Initializable{
     }
 
     // [College] File Read and Add Items
-    private Vector<DirectoryModel> getCollegeData(String fileName) throws FileNotFoundException {
+    private Vector<DirectoryModel> getCollegeData(String fileName) throws FileNotFoundException, RemoteException {
         return tableControl.getCollegeData(fileName);
     }
 
-    private String getCollegeHyperLink(String fileName) throws FileNotFoundException {
+    private String getCollegeHyperLink(String fileName) throws FileNotFoundException, RemoteException {
         collegeModels = getCollegeData("data/"+fileName);
 
         collegeItems.clear();
@@ -359,12 +383,17 @@ public class TableController implements Initializable{
     }
 
     // [Department] File Read and Add Items
-    private Vector<DirectoryModel> getDepartmentData(String fileName) throws FileNotFoundException {
+    private Vector<DirectoryModel> getDepartmentData(String fileName) throws FileNotFoundException, RemoteException {
         return tableControl.getDepartmentData(fileName);
     }
 
     private String getDepartmentHyperLink(String fileName) throws FileNotFoundException {
-        departmentModels = getDepartmentData("data/"+fileName);
+        try {
+			departmentModels = getDepartmentData("data/"+fileName);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
         departmentItems.clear();
 
@@ -379,23 +408,43 @@ public class TableController implements Initializable{
         int item = (int)source;
         if(item<0) return;
         this.departmentPath = this.departmentModels.get(item).getHyperLink();
-        this.getLectureList(this.departmentPath);
+        try {
+			this.getLectureList(this.departmentPath);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     // Lecture Methods
 
-    private Vector<LectureModel> getLectureData(String fileName) throws FileNotFoundException{
-        return tableControl.getLectureData(fileName);
+    private Vector<LectureController> getLectureData(String fileName) throws FileNotFoundException, RemoteException{
+    	Vector<LectureModel> lectureModels = tableControl.getLectureData(fileName); // 파일에서 과목 정보 가져오기
+    	Vector<LectureController> lectureControllers = new Vector<LectureController>(); // 실제 표현데이터 형식
+		LectureController lectureController;
+		
+		for(LectureModel lectureModel: lectureModels) {
+			lectureController = new LectureController();
+			
+			lectureController.setNumber(lectureModel.getNumber());
+			lectureController.setName(lectureModel.getName());
+			lectureController.setProfessor(lectureModel.getProfessor());
+			lectureController.setCredit(lectureModel.getCredit());
+			lectureController.setTime(lectureModel.getTime());
+			
+			lectureControllers.add(lectureController);
+		}
+		return lectureControllers;
     }
 
-    private void getLectureList(String fileName) throws FileNotFoundException {
+    private void getLectureList(String fileName) throws FileNotFoundException, RemoteException {
         lectureTable.getItems().clear();
 
         lectureModels = getLectureData("data/"+fileName);
         lectureList.clear();
 
-        for(LectureModel lectureModel: lectureModels) {
-            lectureTable.getItems().add(new LectureModel(new SimpleIntegerProperty(lectureModel.getNumber()), new SimpleStringProperty(lectureModel.getName()),
+        for(LectureController lectureModel: lectureModels) {
+            lectureTable.getItems().add(new LectureController(new SimpleIntegerProperty(lectureModel.getNumber()), new SimpleStringProperty(lectureModel.getName()),
                     new SimpleStringProperty(lectureModel.getProfessor()), new SimpleIntegerProperty(lectureModel.getCredit()), new SimpleStringProperty(lectureModel.getTime())));
         }
     }

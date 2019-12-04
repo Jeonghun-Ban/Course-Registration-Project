@@ -1,9 +1,16 @@
 package home.model;
 
+import java.io.Serializable;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class StudentsModel {
+public class StudentsModel implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private SimpleStringProperty userID;
 	private SimpleStringProperty userPassword;
 	private SimpleStringProperty userName;

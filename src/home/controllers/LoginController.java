@@ -1,16 +1,17 @@
 package home.controllers;
 
-import home.controllers.MainController;
-import home.controls.LoginControl;
-import home.fileController.CheckDuplication;
-import home.model.UserModel;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.rmi.AccessException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ResourceBundle;
-import java.util.Scanner;
 
+import home.constant;
+import home.fileController.CheckDuplication;
+import home.frameworks.LoginInterface;
+import home.model.UserModel;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -60,10 +61,24 @@ public class LoginController implements Initializable {
 	}
 	
 	// LoginControl
-	LoginControl loginControl = new LoginControl();
+	LoginInterface loginControl = null;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		
+		try {
+			loginControl = (LoginInterface) constant.registry.lookup("login");
+		} catch (AccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		// Action Handler 등록
 		loginButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -168,7 +183,7 @@ public class LoginController implements Initializable {
 	}
 	
 	// Login DB와 사용자 입력값 비교 메소드
-	public boolean authenticate(String inputID, String inputPassword) throws FileNotFoundException{
+	public boolean authenticate(String inputID, String inputPassword) throws FileNotFoundException, RemoteException{
 		return loginControl.authenticate(inputID, inputPassword);
 	}
 	

@@ -1,8 +1,14 @@
 package home.model;
 
+import java.io.Serializable;
 import java.util.Scanner;
 
-public class DirectoryModel {
+public class DirectoryModel implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private int number;
 	private String name;
 	private String hyperLink;

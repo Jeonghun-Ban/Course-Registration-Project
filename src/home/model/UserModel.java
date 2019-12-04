@@ -1,7 +1,15 @@
 package home.model;
 
-public class UserModel {
+import java.io.Serializable;
+
+public class UserModel implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private String userID;
+	private String userPassword;
 	private String userName;
 	private String userCollege;
 	private String userDepartment;
@@ -13,6 +21,12 @@ public class UserModel {
 	}
 	public void setUserID(String userID) {
 		this.userID = userID;
+	}
+	public String getUserPassword() {
+		return userPassword;
+	}
+	public void setUserPassword(String userPassword) {
+		this.userPassword = userPassword;
 	}
 	public String getUserName() {
 		return userName;

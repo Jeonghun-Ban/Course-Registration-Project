@@ -1,15 +1,16 @@
 package home.controllers;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.Scanner;
 import java.util.Vector;
 
-import home.controls.BasketControl;
+import home.constant;
 import home.fileController.CheckDuplication;
+import home.frameworks.BasketInterface;
 import home.model.LectureModel;
 import home.model.UserModel;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -20,8 +21,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
@@ -43,13 +44,13 @@ public class BasketController implements Initializable{
 	
 	// Basket
 	
-	@FXML TableView<LectureModel> basketTable;
+	@FXML TableView<LectureController> basketTable;
 	
-	@FXML TableColumn<LectureModel, Integer> basketNumberColumn;
-	@FXML TableColumn<LectureModel, String> basketNameColumn;
-	@FXML TableColumn<LectureModel, String> basketProfessorColumn;
-	@FXML TableColumn<LectureModel, Integer> basketCreditColumn;
-	@FXML TableColumn<LectureModel, String> basketTimeColumn;
+	@FXML TableColumn<LectureController, Integer> basketNumberColumn;
+	@FXML TableColumn<LectureController, String> basketNameColumn;
+	@FXML TableColumn<LectureController, String> basketProfessorColumn;
+	@FXML TableColumn<LectureController, Integer> basketCreditColumn;
+	@FXML TableColumn<LectureController, String> basketTimeColumn;
 	
 	@FXML Button basketToRegister;
 	@FXML Button basketDelete;
@@ -57,25 +58,25 @@ public class BasketController implements Initializable{
 	
 	// Register
 	
-	@FXML TableView<LectureModel> registerTable;
+	@FXML TableView<LectureController> registerTable;
 	
-	@FXML TableColumn<LectureModel, Integer> registerNumberColumn;
-	@FXML TableColumn<LectureModel, String> registerNameColumn;
-	@FXML TableColumn<LectureModel, String> registerProfessorColumn;
-	@FXML TableColumn<LectureModel, Integer> registerCreditColumn;
-	@FXML TableColumn<LectureModel, String> registerTimeColumn;
+	@FXML TableColumn<LectureController, Integer> registerNumberColumn;
+	@FXML TableColumn<LectureController, String> registerNameColumn;
+	@FXML TableColumn<LectureController, String> registerProfessorColumn;
+	@FXML TableColumn<LectureController, Integer> registerCreditColumn;
+	@FXML TableColumn<LectureController, String> registerTimeColumn;
 	
 	@FXML Button registerToBasket;
 	@FXML Button registerDelete;
 	@FXML Button registerRefresh;
 	
 	// Table Datas
-	private Vector<LectureModel> basketModels;
-	ObservableList<LectureModel> basketList = FXCollections.observableArrayList();
+	private Vector<LectureController> basketControllers;
+	ObservableList<LectureController> basketList = FXCollections.observableArrayList();
 	private Object basketOldValue;
 	
-	private Vector<LectureModel> registerModels;
-	ObservableList<LectureModel> registerList = FXCollections.observableArrayList();
+	private Vector<LectureController> registerControllers;
+	ObservableList<LectureController> registerList = FXCollections.observableArrayList();
 	private Object registerOldValue;
 	
 	// Left Control Bar
@@ -86,17 +87,25 @@ public class BasketController implements Initializable{
 	@FXML Label userNotification;
 	
 	// BasketControl
-	BasketControl basketControl = new BasketControl();
-
+	BasketInterface basketControl = null;
 	
-	public BasketController() {
+	
+	public BasketController() throws RemoteException {
 		this.controller = new MainController();
+
+		try {
+			basketControl = (BasketInterface) constant.registry.lookup("basket");
+		} catch (NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		
 		this.checkCurrentUser();
 	}
 	
 	// Check Login User
-	public void checkCurrentUser() {
+	public void checkCurrentUser() throws RemoteException {
 		UserModel user = basketControl.checkCurrentUser();
 
 		userID = user.getUserID();
@@ -120,7 +129,7 @@ public class BasketController implements Initializable{
 		
 		try {
 			this.getBasketList(this.userID+"_Basket");
-		} catch (FileNotFoundException e) {
+		} catch (FileNotFoundException | RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -142,7 +151,7 @@ public class BasketController implements Initializable{
 			public void handle(MouseEvent event) {
 				Vector<String> selectedLecture = new Vector<>();
 				Vector<String> selectedLectures = new Vector<>();
-				ObservableList<LectureModel> selectedItem = basketTable.getSelectionModel().getSelectedItems();
+				ObservableList<LectureController> selectedItem = basketTable.getSelectionModel().getSelectedItems();
 				
 				for(int i=0;i<selectedItem.size();i++) {
 					selectedLecture.add(String.valueOf(selectedItem.get(i).getNumber()));
@@ -191,7 +200,7 @@ public class BasketController implements Initializable{
 							registerTable.refresh();
 							basketTable.getSelectionModel().clearSelection();
 							registerTable.getSelectionModel().clearSelection();
-						} catch (FileNotFoundException e) {
+						} catch (FileNotFoundException | RemoteException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
@@ -217,7 +226,7 @@ public class BasketController implements Initializable{
 			public void handle(MouseEvent event) {
 				Vector<String> selectedLecture = new Vector<>();
 				Vector<String> selectedLectures = new Vector<>();
-				ObservableList<LectureModel> selectedItem = basketTable.getSelectionModel().getSelectedItems();
+				ObservableList<LectureController> selectedItem = basketTable.getSelectionModel().getSelectedItems();
 				
 				for(int i=0;i<selectedItem.size();i++) {
 					selectedLecture.add(String.valueOf(selectedItem.get(i).getNumber()));
@@ -258,7 +267,7 @@ public class BasketController implements Initializable{
 							getBasketList(userID+"_Basket");
 							basketTable.refresh();
 							basketTable.getSelectionModel().clearSelection();
-						} catch (FileNotFoundException e) {
+						} catch (FileNotFoundException | RemoteException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
@@ -297,7 +306,7 @@ public class BasketController implements Initializable{
 		
 		try {
 			this.getRegisterList(this.userID+"_Register");
-		} catch (FileNotFoundException e) {
+		} catch (FileNotFoundException | RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -318,7 +327,7 @@ public class BasketController implements Initializable{
 			public void handle(MouseEvent event) {
 				Vector<String> selectedLecture = new Vector<>();
 				Vector<String> selectedLectures = new Vector<>();
-				ObservableList<LectureModel> selectedItem = registerTable.getSelectionModel().getSelectedItems();
+				ObservableList<LectureController> selectedItem = registerTable.getSelectionModel().getSelectedItems();
 				
 				for(int i=0;i<selectedItem.size();i++) {
 					selectedLecture.add(String.valueOf(selectedItem.get(i).getNumber()));
@@ -363,7 +372,7 @@ public class BasketController implements Initializable{
 							registerTable.refresh();
 							basketTable.getSelectionModel().clearSelection();
 							registerTable.getSelectionModel().clearSelection();
-						} catch (FileNotFoundException e) {
+						} catch (FileNotFoundException | RemoteException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
@@ -390,7 +399,7 @@ public class BasketController implements Initializable{
 			public void handle(MouseEvent event) {
 				Vector<String> selectedLecture = new Vector<>();
 				Vector<String> selectedLectures = new Vector<>();
-				ObservableList<LectureModel> selectedItem = registerTable.getSelectionModel().getSelectedItems();
+				ObservableList<LectureController> selectedItem = registerTable.getSelectionModel().getSelectedItems();
 				
 				for(int i=0;i<selectedItem.size();i++) {
 					selectedLecture.add(String.valueOf(selectedItem.get(i).getNumber()));
@@ -433,6 +442,9 @@ public class BasketController implements Initializable{
 							basketTable.getSelectionModel().clearSelection();
 							registerTable.getSelectionModel().clearSelection();
 						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (RemoteException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
@@ -486,41 +498,71 @@ public class BasketController implements Initializable{
 	}
 	
 	// Load Data Method
-	private Vector<LectureModel> getBasketData(String fileName) throws FileNotFoundException{
-		return basketControl.getBasketData(fileName);
+	private Vector<LectureController> getBasketData(String fileName) throws FileNotFoundException, RemoteException{
+		Vector<LectureModel> lectureModels = basketControl.getBasketData(fileName); // 파일에서 과목 정보 가져오기
+		Vector<LectureController> lectureControllers = new Vector<LectureController>(); // 실제 표현데이터 형식
+		LectureController lectureController;
+		
+		for(LectureModel lectureModel: lectureModels) {
+			lectureController = new LectureController();
+			
+			lectureController.setNumber(lectureModel.getNumber());
+			lectureController.setName(lectureModel.getName());
+			lectureController.setProfessor(lectureModel.getProfessor());
+			lectureController.setCredit(lectureModel.getCredit());
+			lectureController.setTime(lectureModel.getTime());
+			
+			lectureControllers.add(lectureController);
+		}
+		return lectureControllers;
 	} 
 	
-	public void getBasketList(String fileName) throws FileNotFoundException {		
+	public void getBasketList(String fileName) throws FileNotFoundException, RemoteException {		
 		for(int i=0;i<basketTable.getItems().size();i++) {
 			basketTable.getItems().clear();
 		}
 		
-		basketModels = getBasketData("data/user/"+fileName);
+		basketControllers = getBasketData("data/user/"+fileName);
 		
 		basketList.clear();
 		
-		for(LectureModel basketModel: basketModels) {
-			basketTable.getItems().add(new LectureModel(new SimpleIntegerProperty(basketModel.getNumber()), new SimpleStringProperty(basketModel.getName()), 
-					new SimpleStringProperty(basketModel.getProfessor()), new SimpleIntegerProperty(basketModel.getCredit()), new SimpleStringProperty(basketModel.getTime())));
+		for(LectureController basketController: basketControllers) {
+			basketTable.getItems().add(new LectureController(new SimpleIntegerProperty(basketController.getNumber()), new SimpleStringProperty(basketController.getName()), 
+					new SimpleStringProperty(basketController.getProfessor()), new SimpleIntegerProperty(basketController.getCredit()), new SimpleStringProperty(basketController.getTime())));
 		}
 	}
 	
-	private Vector<LectureModel> getRegisterData(String fileName) throws FileNotFoundException{
-		return basketControl.getRegisterData(fileName);
+	private Vector<LectureController> getRegisterData(String fileName) throws FileNotFoundException, RemoteException{
+		Vector<LectureModel> lectureModels = basketControl.getRegisterData(fileName); // 파일에서 과목 정보 가져오기
+		Vector<LectureController> lectureControllers = new Vector<LectureController>(); // 실제 표현데이터 형식
+		LectureController lectureController;
+		
+		for(LectureModel lectureModel: lectureModels) {
+			lectureController = new LectureController();
+			
+			lectureController.setNumber(lectureModel.getNumber());
+			lectureController.setName(lectureModel.getName());
+			lectureController.setProfessor(lectureModel.getProfessor());
+			lectureController.setCredit(lectureModel.getCredit());
+			lectureController.setTime(lectureModel.getTime());
+			
+			lectureControllers.add(lectureController);
+		}
+		return lectureControllers;
 	} 
 	
-	private void getRegisterList(String fileName) throws FileNotFoundException {		
+	private void getRegisterList(String fileName) throws FileNotFoundException, RemoteException {		
 		for(int i=0;i<registerTable.getItems().size();i++) {
 			registerTable.getItems().clear();
 		}
 		
-		registerModels = getRegisterData("data/user/"+fileName);
+		registerControllers = getRegisterData("data/user/"+fileName);
 		
 		registerList.clear();
 		
-		for(LectureModel registerModel: registerModels) {
-			registerTable.getItems().add(new LectureModel(new SimpleIntegerProperty(registerModel.getNumber()), new SimpleStringProperty(registerModel.getName()), 
-					new SimpleStringProperty(registerModel.getProfessor()), new SimpleIntegerProperty(registerModel.getCredit()), new SimpleStringProperty(registerModel.getTime())));
+		for(LectureController registerController: registerControllers) {
+			registerTable.getItems().add(new LectureController(new SimpleIntegerProperty(registerController.getNumber()), new SimpleStringProperty(registerController.getName()), 
+					new SimpleStringProperty(registerController.getProfessor()), new SimpleIntegerProperty(registerController.getCredit()), new SimpleStringProperty(registerController.getTime())));
 		}
 	}
 	

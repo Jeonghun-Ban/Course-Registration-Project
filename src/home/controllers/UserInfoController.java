@@ -1,9 +1,12 @@
 package home.controllers;
 
 import java.net.URL;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ResourceBundle;
 
-import home.controls.UserInfoControl;
+import home.constant;
+import home.frameworks.UserInfoInterface;
 import home.model.UserModel;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -35,15 +38,28 @@ public class UserInfoController implements Initializable{
 	private String userNumber;
 	
 	// UserInfoControl
-	UserInfoControl userInfoControl = new UserInfoControl();
+	UserInfoInterface userInfoControl = null;
 		
 	public UserInfoController() {
+		
+		try {
+			userInfoControl = (UserInfoInterface) constant.registry.lookup("userinfo");
+		} catch (RemoteException | NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		this.controller = new MainController();
 		
-		this.checkCurrentUser();
+		try {
+			this.checkCurrentUser();
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
-	public void checkCurrentUser() {
+	public void checkCurrentUser() throws RemoteException {
 		UserModel user = userInfoControl.checkCurrentUser();
 
 		userID = user.getUserID();
