@@ -9,8 +9,8 @@ import java.util.ResourceBundle;
 import java.util.Vector;
 
 import home.constant;
-import home.fileController.CheckDuplication;
-import home.fileController.FileTool;
+import home.frameworks.CheckDuplicationInterface;
+import home.frameworks.FileToolInterface;
 import home.frameworks.TableInterface;
 import home.model.DirectoryModel;
 import home.model.LectureModel;
@@ -94,8 +94,8 @@ public class TableController implements Initializable{
 
     // Load Basket.fxml
     private MainController controller;
-    private FileTool fileTool;
-    private CheckDuplication checkDuplication;
+    private FileToolInterface fileTool;
+    private CheckDuplicationInterface checkDuplication;
 
     // TableControl
     TableInterface tableControl = null;
@@ -117,8 +117,13 @@ public class TableController implements Initializable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        this.fileTool = new FileTool();
-        this.checkDuplication = new CheckDuplication();
+        try {
+			this.fileTool = (FileToolInterface) constant.registry.lookup("filetool");
+	        this.checkDuplication = (CheckDuplicationInterface) constant.registry.lookup("checkduplication");
+		} catch (RemoteException | NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     public void checkCurrentUser() throws RemoteException {
@@ -260,7 +265,12 @@ public class TableController implements Initializable{
                     Optional<ButtonType> result = alert.showAndWait();
                     if(result.get()==ButtonType.OK) {
                         for(int i=0; i<selectedLectures.size();i++) {
-                            CheckDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Basket","AddLecture");
+                            try {
+								checkDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Basket","AddLecture");
+							} catch (RemoteException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
                         }
 
                         Alert success = new Alert(AlertType.INFORMATION);

@@ -9,8 +9,8 @@ import java.util.ResourceBundle;
 import java.util.Vector;
 
 import home.constant;
-import home.fileController.CheckDuplication;
 import home.frameworks.BasketInterface;
+import home.frameworks.CheckDuplicationInterface;
 import home.model.LectureModel;
 import home.model.UserModel;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -86,12 +86,20 @@ public class BasketController implements Initializable{
 	
 	@FXML Label userNotification;
 	
-	// BasketControl
+	// frameworks
 	BasketInterface basketControl = null;
+	CheckDuplicationInterface checkDuplication = null;
 	
 	
 	public BasketController() throws RemoteException {
 		this.controller = new MainController();
+		try {
+			checkDuplication = (CheckDuplicationInterface) constant.registry.lookup("checkduplication");
+		} catch (NotBoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 
 		try {
 			basketControl = (BasketInterface) constant.registry.lookup("basket");
@@ -189,8 +197,13 @@ public class BasketController implements Initializable{
 					Optional<ButtonType> result = alert.showAndWait();
 					if(result.get()==ButtonType.OK) {
 						for(int i=0; i<selectedLectures.size();i++) {
-							CheckDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Register","AddLecture");	
-							CheckDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Basket","DeleteLecture");			
+							try {
+								checkDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Register","AddLecture");
+								checkDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Basket","DeleteLecture");			
+							} catch (RemoteException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}	
 						}
 						
 						try {
@@ -260,7 +273,12 @@ public class BasketController implements Initializable{
 					Optional<ButtonType> result = alert.showAndWait();
 					if(result.get()==ButtonType.OK) {
 						for(int i=0; i<selectedLectures.size();i++) {
-							CheckDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Basket","DeleteLecture");					
+							try {
+								checkDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Basket","DeleteLecture");
+							} catch (RemoteException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}					
 						}
 						
 						try {
@@ -361,8 +379,13 @@ public class BasketController implements Initializable{
 					Optional<ButtonType> result = alert.showAndWait();
 					if(result.get()==ButtonType.OK) {
 						for(int i=0; i<selectedLectures.size();i++) {
-							CheckDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Basket","AddLecture");					
-							CheckDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Register","DeleteLecture");					
+							try {
+								checkDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Basket","AddLecture");
+								checkDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Register","DeleteLecture");					
+							} catch (RemoteException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}					
 						}
 						
 						try {
@@ -433,7 +456,12 @@ public class BasketController implements Initializable{
 					Optional<ButtonType> result = alert.showAndWait();
 					if(result.get()==ButtonType.OK) {
 						for(int i=0; i<selectedLectures.size();i++) {
-							CheckDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Register","DeleteLecture");					
+							try {
+								checkDuplication.manageLectureFile(selectedLectures.get(i),"data/user/"+userID+"_Register","DeleteLecture");
+							} catch (RemoteException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}					
 						}
 						
 						try {

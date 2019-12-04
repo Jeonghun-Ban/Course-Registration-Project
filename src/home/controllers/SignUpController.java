@@ -9,7 +9,7 @@ import java.rmi.RemoteException;
 import java.util.ResourceBundle;
 
 import home.constant;
-import home.fileController.CheckDuplication;
+import home.frameworks.CheckDuplicationInterface;
 import home.frameworks.SignUpInterface;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -52,8 +52,10 @@ public class SignUpController implements Initializable {
 	private String dataDepartment;
 	private String dataNumber;
 	
-	// SignUpControl
+	// frameworks
 	SignUpInterface signUpControl = null;
+	CheckDuplicationInterface checkDuplication = null;
+	
 	
 	public SignUpController() {
 		this.controller = new MainController();
@@ -64,6 +66,7 @@ public class SignUpController implements Initializable {
 		
 		try {
 			signUpControl = (SignUpInterface) constant.registry.lookup("signup");
+			checkDuplication = (CheckDuplicationInterface) constant.registry.lookup("checkduplication");
 		} catch (RemoteException | NotBoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -123,7 +126,7 @@ public class SignUpController implements Initializable {
 			
 			if(!idCheck && !numberCheck) {
 				String userInfo = this.inputID+" "+this.inputPassword+" "+this.inputName+" "+this.inputCollege + " "+this.inputDepartment + " "+this.inputNumber;
-				CheckDuplication.manageUserFile(userInfo, "data/User/Login");
+				checkDuplication.manageUserFile(userInfo, "data/User/Login");
 				this.signUpCheck = true;
 				
 				// 회원가입한 사용자의 파일 생성

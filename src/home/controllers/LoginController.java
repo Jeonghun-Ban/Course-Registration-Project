@@ -9,7 +9,7 @@ import java.rmi.RemoteException;
 import java.util.ResourceBundle;
 
 import home.constant;
-import home.fileController.CheckDuplication;
+import home.frameworks.CheckDuplicationInterface;
 import home.frameworks.LoginInterface;
 import home.model.UserModel;
 import javafx.beans.value.ChangeListener;
@@ -60,14 +60,16 @@ public class LoginController implements Initializable {
 		this.controller = new MainController();
 	}
 	
-	// LoginControl
+	// frameworks
 	LoginInterface loginControl = null;
+	CheckDuplicationInterface checkDuplication = null;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		
 		try {
 			loginControl = (LoginInterface) constant.registry.lookup("login");
+			checkDuplication = (CheckDuplicationInterface) constant.registry.lookup("checkduplication");
 		} catch (AccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -161,7 +163,7 @@ public class LoginController implements Initializable {
 					
 			if(loginCheck) {
 				String userInfo = this.dataID + " "+this.dataName+" "+this.dataCollege + " "+this.dataDepartment + " "+this.dataNumber;
-				CheckDuplication.manageCurrentUser(userInfo, "data/user/CurrentUser");
+				checkDuplication.manageCurrentUser(userInfo, "data/user/CurrentUser");
 				
 				this.controller.loadStage("src/home/fxml/Table.fxml","명지대학교 수강신청 시스템");
 				Stage login = (Stage)loginButton.getScene().getWindow();
