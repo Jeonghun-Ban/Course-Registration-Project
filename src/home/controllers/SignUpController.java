@@ -129,11 +129,7 @@ public class SignUpController implements Initializable {
 				checkDuplication.manageUserFile(userInfo, "data/User/Login");
 				this.signUpCheck = true;
 				
-				// 회원가입한 사용자의 파일 생성
-				File basket = new File("data/user/" + inputID + "_Basket");
-				basket.createNewFile();
-				File register = new File("data/user/" + inputID + "_Register");
-				register.createNewFile();
+				signUpControl.createUserData(inputID);
 				
 			} else if(!idCheck && numberCheck) {
 				Alert alert = new Alert(AlertType.ERROR);
